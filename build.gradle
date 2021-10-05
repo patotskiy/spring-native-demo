@@ -1,0 +1,56 @@
+plugins {
+	id 'org.springframework.boot' version '2.5.5'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+	id 'org.springframework.experimental.aot' version '0.10.4'
+	id 'org.graalvm.buildtools.native' version '0.9.3'
+	id 'application'
+}
+
+group = 'com.github.patotskiy'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	maven { url 'https://repo.spring.io/release' }
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+	implementation 'org.springframework:spring-web'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation group: 'com.h2database', name: 'h2', version: '1.4.200'
+}
+
+test {
+	useJUnitPlatform()
+}
+
+application{
+	mainClass = 'com.github.patotskiy.springnativedemo.SpringNativeDemoApplication'
+}
+
+bootBuildImage {
+	builder = 'paketobuildpacks/builder:tiny'
+	environment = ['BP_NATIVE_IMAGE': 'true']
+}
+
+nativeBuild {
+	classpath processAotResources.outputs, compileAotJava.outputs
+}
+
+nativeTest {
+	classpath processAotTestResources.outputs, compileAotTestJava.outputs
+}
